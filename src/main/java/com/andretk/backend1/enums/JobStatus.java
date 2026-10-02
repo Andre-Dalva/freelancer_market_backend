@@ -1,7 +1,8 @@
 package com.andretk.backend1.enums;
 
-public enum JobStaus {
+public enum JobStatus {
+    OPEN,
     ON_GOING,
-    CLOSE,
+    CLOSED,
     FINISHED
 }

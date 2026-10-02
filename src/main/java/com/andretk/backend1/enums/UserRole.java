@@ -1,6 +1,6 @@
 package com.andretk.backend1.enums;
 
-public enum Roles {
+public enum UserRole {
     FREELANCER,
     RECRUITER,
     ADMIN

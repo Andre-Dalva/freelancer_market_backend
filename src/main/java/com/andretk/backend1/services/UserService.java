@@ -1,4 +1,90 @@
 package com.andretk.backend1.services;
 
+import com.andretk.backend1.dtos.ChangePasswordRequest;
+import com.andretk.backend1.dtos.RegisterUserRequest;
+import com.andretk.backend1.dtos.UpdateUserRequest;
+import com.andretk.backend1.dtos.UserDto;
+import com.andretk.backend1.exceptions.ResourceConflictException;
+import com.andretk.backend1.exceptions.ResourceNotFoundException;
+import com.andretk.backend1.mappers.UserMapper;
+import com.andretk.backend1.repositories.UserRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Set;
+
+@Service
+@AllArgsConstructor
 public class UserService {
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private PasswordEncoder passwordEncoder;
+
+    @Transactional(readOnly = true)
+    public List<UserDto> getAllUsers(String sort){
+        if (!Set.of("name","email","id").contains(sort)) sort = "id";
+
+        return userRepository.findAll(Sort.by(sort)).stream()
+                .map(userMapper::toUserDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public UserDto getUserById(Long id){
+        var user = userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("User with id: " + id + " doesn't exits")
+        );
+
+        return userMapper.toUserDto(user);
+    }
+
+    @Transactional
+    public UserDto registerUser(RegisterUserRequest request){
+
+        if (userRepository.existsByEmail(request.getEmail()))
+            throw new ResourceConflictException("User with email: " + request.getEmail() + " already exits");
+
+        var user = userMapper.toUser(request);
+        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+
+        userRepository.save(user);
+        return userMapper.toUserDto(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long id){
+        var user = userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("User with " + id + " not found"));
+        userRepository.delete(user);
+    }
+
+    @Transactional
+    public UserDto updateUser(Long id, UpdateUserRequest request){
+        var user = userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("User with " + id + " not found"));
+
+        if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(user.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
+            throw new ResourceConflictException("Email already in use");
+        }
+
+        userMapper.update(request, user);
+
+        return userMapper.toUserDto(user);
+    }
+
+    @Transactional
+    public void changePassword(Long id, ChangePasswordRequest request){
+        var user = userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("User with " + id + " not found"));
+
+        if (!user.getPasswordHash().equals(request.getOldPassword()))
+            throw new ResourceConflictException("Password doesn't match");
+
+        user.setPasswordHash(request.getNewPassword());
+        userRepository.save(user);
+    }
 }

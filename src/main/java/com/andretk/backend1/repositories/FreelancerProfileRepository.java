@@ -1,4 +1,7 @@
 package com.andretk.backend1.repositories;
 
-public interface FreelancerProfile {
+import com.andretk.backend1.entities.FreelancerProfile;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface FreelancerProfileRepository extends JpaRepository<FreelancerProfile, Long> {
 }
