@@ -4,6 +4,7 @@ import com.andretk.backend1.dtos.ChangePasswordRequest;
 import com.andretk.backend1.dtos.RegisterUserRequest;
 import com.andretk.backend1.dtos.UpdateUserRequest;
 import com.andretk.backend1.dtos.UserDto;
+import com.andretk.backend1.exceptions.BadRequestException;
 import com.andretk.backend1.exceptions.ResourceConflictException;
 import com.andretk.backend1.exceptions.ResourceNotFoundException;
 import com.andretk.backend1.mappers.UserMapper;
@@ -81,10 +82,12 @@ public class UserService {
         var user = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("User with " + id + " not found"));
 
-        if (!user.getPasswordHash().equals(request.getOldPassword()))
-            throw new ResourceConflictException("Password doesn't match");
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash()))
+            throw new BadRequestException("Password doesn't match");
 
-        user.setPasswordHash(request.getNewPassword());
-        userRepository.save(user);
+        if (!passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash()))
+            throw new BadRequestException("New password cannot be the same as current password");
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
     }
 }
