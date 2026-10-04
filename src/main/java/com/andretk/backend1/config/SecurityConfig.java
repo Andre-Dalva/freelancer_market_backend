@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(c -> c
                         .requestMatchers(HttpMethod.GET,"/jobs").permitAll()
                         .requestMatchers(HttpMethod.POST,"/users").permitAll()
-                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/auth/login","/auth/validate").permitAll()
                         .anyRequest().authenticated()
 
                 );
