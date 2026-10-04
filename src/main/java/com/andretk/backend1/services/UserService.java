@@ -7,6 +7,7 @@ import com.andretk.backend1.dtos.UserDto;
 import com.andretk.backend1.exceptions.BadRequestException;
 import com.andretk.backend1.exceptions.ResourceConflictException;
 import com.andretk.backend1.exceptions.ResourceNotFoundException;
+import com.andretk.backend1.exceptions.UnauthorizedException;
 import com.andretk.backend1.mappers.UserMapper;
 import com.andretk.backend1.repositories.UserRepository;
 import lombok.AllArgsConstructor;
@@ -95,11 +96,9 @@ public class UserService {
     @Transactional
     public UserDto me(){
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        var email = (String) authentication.getPrincipal();
+        if (authentication == null) throw new UnauthorizedException("User not authenticated");
+        var userId = (Long) authentication.getPrincipal();
 
-        var fullUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
-
-        return userMapper.toUserDto(fullUser);
+        return getUserById(userId);
     }
 }

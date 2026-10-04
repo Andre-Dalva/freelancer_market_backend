@@ -3,6 +3,7 @@ package com.andretk.backend1.controllers;
 import com.andretk.backend1.dtos.JwtResponse;
 import com.andretk.backend1.dtos.LoginRequest;
 import com.andretk.backend1.dtos.UserDto;
+import com.andretk.backend1.repositories.UserRepository;
 import com.andretk.backend1.services.JwtService;
 import com.andretk.backend1.services.UserService;
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequest request){
@@ -29,7 +31,9 @@ public class AuthController {
                 )
         );
 
-        var token = jwtService.generateToken(request.getEmail());
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        var token = jwtService.generateToken(user);
+
         return ResponseEntity.ok(new JwtResponse(token));
     }
 

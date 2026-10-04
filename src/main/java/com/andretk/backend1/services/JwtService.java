@@ -1,5 +1,6 @@
 package com.andretk.backend1.services;
 
+import com.andretk.backend1.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -15,12 +16,15 @@ public class JwtService {
     @Value("${spring.jwt.secret}")
     private String secret;
 
-    public String generateToken(String email){
+    public String generateToken(User user){
         final long tokenExpiration = 86400; // 1 day
 
         return Jwts.builder()
-                .subject(email)
+                .subject(user.getId().toString())
                 .issuedAt(new Date())
+                .claim("name", user.getName())
+                .claim("email", user.getEmail())
+                .claim("role", user.getRole())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * tokenExpiration))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
                 .compact();
@@ -35,8 +39,8 @@ public class JwtService {
         }
     }
 
-    public String getEmailFromToken(String token){
-            return getClaims(token).getSubject();
+    public Long getIdFromToken(String token){
+        return Long.valueOf(getClaims(token).getSubject());
     }
 
     private Claims getClaims(String token){
