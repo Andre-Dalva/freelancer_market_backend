@@ -1,5 +1,6 @@
 package com.andretk.backend1.controllers;
 
+import com.andretk.backend1.config.JwtConfig;
 import com.andretk.backend1.dtos.JwtResponse;
 import com.andretk.backend1.dtos.LoginRequest;
 import com.andretk.backend1.dtos.UserDto;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final JwtConfig jwtConfig;
     private final UserService userService;
     private final UserRepository userRepository;
 
@@ -41,7 +43,7 @@ public class AuthController {
         var cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("auth/refresh");
-        cookie.setMaxAge(604800); //7 days
+        cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration()); //7 days
         cookie.setSecure(true);
         response.addCookie(cookie);
 
