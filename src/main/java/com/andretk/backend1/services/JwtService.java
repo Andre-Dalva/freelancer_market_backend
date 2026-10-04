@@ -1,5 +1,6 @@
 package com.andretk.backend1.services;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -14,7 +15,6 @@ public class JwtService {
     @Value("${spring.jwt.secret}")
     private String secret;
 
-
     public String generateToken(String email){
         final long tokenExpiration = 86400; // 1 day
 
@@ -27,16 +27,22 @@ public class JwtService {
     }
 
     public boolean validateToken(String token){
-
         try {
-            Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
-                .build()
-                .parseSignedClaims(token);
-
+            getClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException  e) {
             return false;
         }
+    }
+
+    public String getEmailFromToken(String token){
+            return getClaims(token).getSubject();
+    }
+
+    private Claims getClaims(String token){
+        return Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+                .build()
+                .parseSignedClaims(token).getPayload();
     }
 }
