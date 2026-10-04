@@ -2,7 +2,9 @@ package com.andretk.backend1.controllers;
 
 import com.andretk.backend1.dtos.JwtResponse;
 import com.andretk.backend1.dtos.LoginRequest;
+import com.andretk.backend1.dtos.UserDto;
 import com.andretk.backend1.services.JwtService;
+import com.andretk.backend1.services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequest request){
@@ -35,5 +38,11 @@ public class AuthController {
         var token = authHeader.replace("Bearer ","");
 
         return jwtService.validateToken(token);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me(){
+        var userDto = userService.me();
+        return ResponseEntity.ok(userDto);
     }
 }

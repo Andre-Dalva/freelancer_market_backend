@@ -11,6 +11,7 @@ import com.andretk.backend1.mappers.UserMapper;
 import com.andretk.backend1.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,5 +90,16 @@ public class UserService {
             throw new BadRequestException("New password cannot be the same as current password");
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+    }
+
+    @Transactional
+    public UserDto me(){
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var email = (String) authentication.getPrincipal();
+
+        var fullUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+
+        return userMapper.toUserDto(fullUser);
     }
 }
