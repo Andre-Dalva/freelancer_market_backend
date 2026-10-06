@@ -4,7 +4,6 @@ import com.andretk.backend1.dtos.JwtResponse;
 import com.andretk.backend1.dtos.LoginRequest;
 import com.andretk.backend1.dtos.UserDto;
 import com.andretk.backend1.services.AuthService;
-import com.andretk.backend1.services.JwtService;
 import com.andretk.backend1.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,9 +15,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @AllArgsConstructor
 public class AuthController {
-    private final JwtService jwtService;
     private final UserService userService;
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequest request,
@@ -30,9 +28,18 @@ public class AuthController {
         return ResponseEntity.ok(new JwtResponse(authLoginDto.getAccessToken()));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtResponse> refresh(@CookieValue(value = "refreshToken") String refreshToken){
+        var newAccessToken = authService.refreshToken(refreshToken);
+
+        return ResponseEntity.ok(new JwtResponse(newAccessToken));
+    }
+
+
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(){
         var userDto = userService.me();
+
         return ResponseEntity.ok(userDto);
     }
 }

@@ -7,6 +7,6 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class AuthLoginDto {
-    public String accessToken;
+    private String accessToken;
     private Cookie cookie;
 }
