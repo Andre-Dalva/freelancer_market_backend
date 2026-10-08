@@ -2,6 +2,7 @@ package com.andretk.backend1.services;
 
 import com.andretk.backend1.config.JwtConfig;
 import com.andretk.backend1.entities.User;
+import com.andretk.backend1.enums.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -46,6 +47,10 @@ public class JwtService {
 
     public Long getIdFromToken(String token){
         return Long.valueOf(getClaims(token).getSubject());
+    }
+
+    public UserRole getRoleFromToken(String token){
+        return UserRole.valueOf(getClaims(token).get("role", String.class));
     }
 
     private Claims getClaims(String token){

@@ -1,5 +1,6 @@
 package com.andretk.backend1.config;
 
+import com.andretk.backend1.enums.UserRole;
 import com.andretk.backend1.filters.JwtAuthenticationFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -57,13 +58,24 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/users").permitAll()
                         .requestMatchers(HttpMethod.POST,"/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST,"/auth/refresh").permitAll()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/jobs/recruiter/**").hasRole(UserRole.RECRUITER.name())
                         .anyRequest().authenticated()
 
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(c->
-                            c.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
-                        )
+                        {
+                            c.authenticationEntryPoint(
+                                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
+                            );
+                            c.accessDeniedHandler((
+                                        (request, response, accessDeniedException) ->
+                                            response.setStatus(HttpStatus.FORBIDDEN.value()
+                                        )
+
+                            ));
+                        }
                 );
         return http.build();
     }
