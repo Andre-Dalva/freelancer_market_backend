@@ -1,6 +1,5 @@
 package com.andretk.backend1.config;
 
-import com.andretk.backend1.enums.UserRole;
 import com.andretk.backend1.filters.JwtAuthenticationFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @AllArgsConstructor
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
@@ -54,12 +55,11 @@ public class SecurityConfig {
                         c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(c -> c
-                        .requestMatchers(HttpMethod.GET,"/jobs").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/users").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/auth/refresh").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/jobs/recruiter/**").hasRole(UserRole.RECRUITER.name())
+                        .requestMatchers(HttpMethod.GET,"/jobs").permitAll() // For my fronted display
+                        .requestMatchers(HttpMethod.POST,"/users","/auth/login","/auth/refresh").permitAll() //For
+                        // registration,  login and refreshing access token.
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll() //For
+                        // Swagger
                         .anyRequest().authenticated()
 
                 )

@@ -64,23 +64,21 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/me")
     @Operation(summary = "Updates a user")
     public  ResponseEntity<UserDto> updateUser(
-            @Parameter(description = "The Id of the user") @PathVariable Long id,
             @RequestBody UpdateUserRequest request
     ){
-        var user = userService.updateUser(id, request);
+        var user = userService.updateUser(request);
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/{id}/change-password")
+    @PostMapping("/change-password")
     @Operation(summary = "Changes the password of the user")
     public ResponseEntity<Void> changePassword(
-            @Parameter(description = "The Id of the user") @PathVariable Long id,
             @Valid @RequestBody ChangePasswordRequest request
             ){
-        userService.changePassword(id, request);
+        userService.changePassword(request);
         return ResponseEntity.noContent().build();
     }
 }

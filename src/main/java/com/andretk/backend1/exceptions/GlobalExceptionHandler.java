@@ -58,4 +58,11 @@ public class GlobalExceptionHandler {
     ){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", exception.getMessage()));
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, String>> handleForbiddenException(
+            ForbiddenException exception
+    ){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", exception.getMessage()));
+    }
 }

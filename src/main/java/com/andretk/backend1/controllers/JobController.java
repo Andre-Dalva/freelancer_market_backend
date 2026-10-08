@@ -24,7 +24,7 @@ public class JobController {
     @GetMapping
     @Operation(summary = "Returns all jobs")
     public ResponseEntity<List<JobDto>> getAllJobs(
-            @RequestParam(required = false, defaultValue = "id", name = "sort") String sort
+            @RequestParam(required = false, defaultValue = "createdAt", name = "sort") String sort
     ) {
         var allJobs = jobService.getAllJobs(sort);
 
@@ -33,19 +33,27 @@ public class JobController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Returns one job")
-    public ResponseEntity<JobDto> getJob(@Parameter(description = "The id of the job") @PathVariable Long id){
+    public ResponseEntity<JobDto> getJobById(@Parameter(description = "The id of the job") @PathVariable Long id){
         var job = jobService.getJobById(id);
         return ResponseEntity.ok(job);
     }
 
-    @PostMapping("/recruiter/{recruiterId}")
+    @GetMapping("/recruiter/{id}")
+    public ResponseEntity<List<JobDto>> getJobByRecruiterId(
+            @Parameter(description = "The id of the recruiter") @PathVariable Long id
+    ){
+        var jobs = jobService.getJobByRecruiterId(id);
+
+        return ResponseEntity.ok(jobs);
+    }
+
+    @PostMapping
     @Operation(summary = "Creates a job (using recruiter's Id)")
     public ResponseEntity<JobDto> createJob(
-            @Parameter(description = "The id of the recruiter") @PathVariable Long recruiterId,
             @Valid @RequestBody CreateJobRequest request,
             UriComponentsBuilder uriBuilder
-            ){
-        var newJob = jobService.createJob(recruiterId, request);
+    ){
+        var newJob = jobService.createJob(request);
 
         var uri = uriBuilder.path("/jobs/{id}")
                 .buildAndExpand(newJob.getId()).toUri();

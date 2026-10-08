@@ -38,11 +38,11 @@ public class ApplicationController {
 
     @GetMapping("/freelancer/{id}")
     @Operation(summary = "Returns all applications made by one freelancer")
-    public ResponseEntity<List<ApplicationDto>> getFreelancerApplications(
+    public ResponseEntity<List<ApplicationDto>> getApplicationsByFreelancerId(
             @Parameter(description = "The id of the freelancer") @PathVariable Long id,
             @RequestParam(required = false, defaultValue = "id", name = "sort") String sort
     ){
-        var freelancerApplications = applicationService.getFreelancerApplications(id, sort);
+        var freelancerApplications = applicationService.getApplicationsByFreelancerId(id, sort);
 
         return ResponseEntity.ok(freelancerApplications);
     }
@@ -58,22 +58,21 @@ public class ApplicationController {
         return ResponseEntity.ok(jobApplications);
     }
 
-    @PostMapping("/job/{jobId}/freelancer/{freelancerId}")
+    @PostMapping("/job/{jobId}")
     @Operation(summary = "Applies to a job (using the freelancer Id)")
     public ResponseEntity<ApplicationDto> applyToJob(
             @Parameter(description = "The id of the job") @PathVariable Long jobId,
-            @Parameter(description = "The id of the freelancer") @PathVariable Long freelancerId,
             UriComponentsBuilder uriBuilder
     ){
 
-        var newApplication = applicationService.createApplication(freelancerId,jobId);
+        var newApplication = applicationService.createApplication(jobId);
         var uri = uriBuilder.path("/applications/{id}")
                 .buildAndExpand(newApplication.getId()).toUri();
 
         return ResponseEntity.created(uri).body(newApplication);
     }
 
-    @PostMapping("/{id}/accept")
+    @PatchMapping("/{id}/accept")
     @Operation(summary = "Accepts an application")
     public ResponseEntity<ApplicationDto> acceptNewApplication(
             @Parameter(description = "The id of the application") @PathVariable Long id

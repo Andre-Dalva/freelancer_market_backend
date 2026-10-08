@@ -6,8 +6,8 @@ import com.andretk.backend1.dtos.LoginRequest;
 import com.andretk.backend1.exceptions.ResourceNotFoundException;
 import com.andretk.backend1.exceptions.UnauthorizedException;
 import com.andretk.backend1.repositories.UserRepository;
-import jakarta.servlet.http.Cookie;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -36,11 +36,7 @@ public class AuthService {
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
 
-        var cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/auth/refresh");
-        cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration()); //7 days
-        cookie.setSecure(true);
+        var cookie = createRefreshTokenCookie(refreshToken);
 
         return new AuthLoginDto(accessToken,cookie);
     }
@@ -55,5 +51,15 @@ public class AuthService {
 
         return jwtService.generateAccessToken(user);
 
+    }
+
+    public ResponseCookie createRefreshTokenCookie(String refreshToken) {
+        return ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/auth/refresh")
+                .maxAge(jwtConfig.getRefreshTokenExpiration())
+                .sameSite("Strict")
+                .build();
     }
 }

@@ -13,7 +13,7 @@ import com.andretk.backend1.mappers.UserMapper;
 import com.andretk.backend1.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +27,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UtilityService utilityService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(readOnly = true)
     public List<UserDto> getAllUsers(String sort){
         if (!Set.of("name","email","id").contains(sort)) sort = "id";
@@ -60,15 +62,23 @@ public class UserService {
         return userMapper.toUserDto(user);
     }
 
+
+    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
     @Transactional
     public void deleteUser(Long id){
         var user = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("User with " + id + " not found"));
+
+        utilityService.validateOwnerOrAdmin(id);
+
         userRepository.delete(user);
     }
 
+
     @Transactional
-    public UserDto updateUser(Long id, UpdateUserRequest request){
+    public UserDto updateUser(UpdateUserRequest request){
+        Long id = utilityService.getCurrentUserId();
+
         var user = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("User with " + id + " not found"));
 
@@ -83,25 +93,24 @@ public class UserService {
     }
 
     @Transactional
-    public void changePassword(Long id, ChangePasswordRequest request){
+    public void changePassword(ChangePasswordRequest request){
+        Long id = utilityService.getCurrentUserId();
+
         var user = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("User with " + id + " not found"));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash()))
             throw new BadRequestException("Password doesn't match");
 
-        if (!passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash()))
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash()))
             throw new BadRequestException("New password cannot be the same as current password");
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
     }
 
     @Transactional
-    public UserDto me(){
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) throw new UnauthorizedException("User not authenticated");
-        var userId = (Long) authentication.getPrincipal();
-
+    public UserDto currentUser(){
+        var userId = utilityService.getCurrentUserId();
         return getUserById(userId);
     }
 }

@@ -18,4 +18,7 @@ public interface JobRepository extends JpaRepository<Job,Long> {
     @Override
     @EntityGraph(attributePaths = {"recruiter"})
     Optional<Job> findById(Long id);
+
+    @EntityGraph(attributePaths = {"recruiter"})
+    List<Job> findAllByRecruiterId( Long id);
 }

@@ -3,11 +3,12 @@ package com.andretk.backend1.controllers;
 import com.andretk.backend1.dtos.JwtResponse;
 import com.andretk.backend1.dtos.LoginRequest;
 import com.andretk.backend1.dtos.UserDto;
+import com.andretk.backend1.exceptions.UnauthorizedException;
 import com.andretk.backend1.services.AuthService;
 import com.andretk.backend1.services.UserService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,17 +20,20 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequest request,
-                                             HttpServletResponse response){
+    public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequest request){
 
         var authLoginDto = authService.login(request);
-        response.addCookie(authLoginDto.getCookie());
 
-        return ResponseEntity.ok(new JwtResponse(authLoginDto.getAccessToken()));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, authLoginDto.getCookie().toString())
+                .body(new JwtResponse(authLoginDto.getAccessToken()));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(@CookieValue(value = "refreshToken") String refreshToken){
+        if (refreshToken == null || refreshToken.isBlank())
+            throw new UnauthorizedException("Refresh token is missing");
+
         var newAccessToken = authService.refreshToken(refreshToken);
 
         return ResponseEntity.ok(new JwtResponse(newAccessToken));
@@ -38,7 +42,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(){
-        var userDto = userService.me();
+        var userDto = userService.currentUser();
 
         return ResponseEntity.ok(userDto);
     }
