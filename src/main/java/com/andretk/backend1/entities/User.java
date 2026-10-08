@@ -31,7 +31,9 @@ public class User {
     private String passwordHash;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private UserRole role = UserRole.FREELANCER;
 
     @Column(name = "location")
     private String location;

@@ -4,6 +4,7 @@ import com.andretk.backend1.dtos.ChangePasswordRequest;
 import com.andretk.backend1.dtos.RegisterUserRequest;
 import com.andretk.backend1.dtos.UpdateUserRequest;
 import com.andretk.backend1.dtos.UserDto;
+import com.andretk.backend1.enums.UserRole;
 import com.andretk.backend1.exceptions.BadRequestException;
 import com.andretk.backend1.exceptions.ResourceConflictException;
 import com.andretk.backend1.exceptions.ResourceNotFoundException;
@@ -25,7 +26,7 @@ import java.util.Set;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public List<UserDto> getAllUsers(String sort){
@@ -50,8 +51,10 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail()))
             throw new ResourceConflictException("User with email: " + request.getEmail() + " already exits");
 
+        if (request.getRole() == null ) request.setRole(UserRole.FREELANCER);
+
         var user = userMapper.toUser(request);
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
         return userMapper.toUserDto(user);

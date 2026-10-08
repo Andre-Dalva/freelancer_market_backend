@@ -6,9 +6,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
+@Setter
 public class RegisterUserRequest {
     @NotBlank(message = "name is required")
     private String name;
@@ -19,10 +21,9 @@ public class RegisterUserRequest {
 
     @NotBlank(message = "password is required")
     @Size(min = 6, max = 25, message = "password  must be between 6-25 characters")
-    private String passwordHash;
+    private String password;
 
-    @NotBlank(message = "Role cannot be null")
-    private String role;
+    private UserRole role;
 
     private String location;
     private String phoneNumber;
