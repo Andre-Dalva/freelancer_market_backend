@@ -17,13 +17,13 @@ public class FreelancerProfile {
     @Id
     private Long id;
 
-    @Column(name = "skills", nullable = false)
+    @Column(name = "skills")
     private String skills;
 
-    @Column(name = "languages", nullable = false)
+    @Column(name = "languages")
     private String languages;
 
-    @Column(name = "date_of_birth", nullable = false)
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
