@@ -62,4 +62,14 @@ public class AuthService {
                 .sameSite("Strict")
                 .build();
     }
+
+    public ResponseCookie clearRefreshTokenCookie() {
+        return ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/auth/refresh")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+    }
 }

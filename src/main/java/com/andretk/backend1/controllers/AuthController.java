@@ -1,5 +1,6 @@
 package com.andretk.backend1.controllers;
 
+import com.andretk.backend1.dtos.CompleteUserDto;
 import com.andretk.backend1.dtos.JwtResponse;
 import com.andretk.backend1.dtos.LoginRequest;
 import com.andretk.backend1.dtos.UserDto;
@@ -29,6 +30,14 @@ public class AuthController {
                 .body(new JwtResponse(authLoginDto.getAccessToken()));
     }
 
+    @PatchMapping("/logout")
+    public ResponseEntity<Void> logout(){
+        var logOut = authService.clearRefreshTokenCookie();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, logOut.toString())
+                .build();
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(@CookieValue(value = "refreshToken") String refreshToken){
         if (refreshToken == null || refreshToken.isBlank())
@@ -41,7 +50,7 @@ public class AuthController {
 
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> me(){
+    public ResponseEntity<CompleteUserDto> me(){
         var userDto = userService.currentUser();
 
         return ResponseEntity.ok(userDto);
