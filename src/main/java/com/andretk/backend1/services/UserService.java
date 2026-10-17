@@ -1,14 +1,10 @@
 package com.andretk.backend1.services;
 
-import com.andretk.backend1.dtos.ChangePasswordRequest;
-import com.andretk.backend1.dtos.RegisterUserRequest;
-import com.andretk.backend1.dtos.UpdateUserRequest;
-import com.andretk.backend1.dtos.UserDto;
+import com.andretk.backend1.dtos.*;
 import com.andretk.backend1.enums.UserRole;
 import com.andretk.backend1.exceptions.BadRequestException;
 import com.andretk.backend1.exceptions.ResourceConflictException;
 import com.andretk.backend1.exceptions.ResourceNotFoundException;
-import com.andretk.backend1.exceptions.UnauthorizedException;
 import com.andretk.backend1.mappers.UserMapper;
 import com.andretk.backend1.repositories.UserRepository;
 import lombok.AllArgsConstructor;
@@ -39,12 +35,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserDto getUserById(Long id){
+    public CompleteUserDto getUserById(Long id){
         var user = userRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("User with id: " + id + " doesn't exits")
         );
 
-        return userMapper.toUserDto(user);
+        return userMapper.toCompleteUserDto(user);
     }
 
     @Transactional
@@ -63,7 +59,6 @@ public class UserService {
     }
 
 
-    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
     @Transactional
     public void deleteUser(Long id){
         var user = userRepository.findById(id).orElseThrow(
@@ -109,7 +104,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto currentUser(){
+    public CompleteUserDto currentUser(){
         var userId = utilityService.getCurrentUserId();
         return getUserById(userId);
     }

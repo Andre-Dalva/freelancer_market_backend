@@ -1,9 +1,6 @@
 package com.andretk.backend1.controllers;
 
-import com.andretk.backend1.dtos.ChangePasswordRequest;
-import com.andretk.backend1.dtos.RegisterUserRequest;
-import com.andretk.backend1.dtos.UpdateUserRequest;
-import com.andretk.backend1.dtos.UserDto;
+import com.andretk.backend1.dtos.*;
 import com.andretk.backend1.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +32,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Returns just one user")
-    public ResponseEntity<UserDto> getUser(@Parameter(description = "The Id of the user") @PathVariable Long id){
+    public ResponseEntity<CompleteUserDto> getUserById(@Parameter(description = "The Id of the user") @PathVariable Long id){
 
         var user = userService.getUserById(id);
         return ResponseEntity.ok(user);
