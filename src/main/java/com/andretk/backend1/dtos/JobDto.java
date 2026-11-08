@@ -17,5 +17,6 @@ public class JobDto {
     private String benefitsAndPayments;
     private Instant createdAt;
     private String recruiterName;
+    private Long recruiterId;
     private JobStatus status;
 }

@@ -11,6 +11,7 @@ import org.mapstruct.MappingTarget;
 public interface JobMapper {
 
     @Mapping(source = "recruiter.name", target = "recruiterName")
+    @Mapping(source = "recruiter.id", target = "recruiterId")
     JobDto toJobDto(Job job);
     Job toJob(CreateJobRequest request);
     void update(CreateJobRequest request, @MappingTarget Job job);
